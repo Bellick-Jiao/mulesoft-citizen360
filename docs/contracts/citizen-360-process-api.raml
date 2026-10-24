@@ -1,0 +1,114 @@
+#%RAML 1.0
+---
+title: Citizen 360 Process API
+version: v1
+baseUri: http://localhost:8084/process
+mediaType: application/json
+protocols: [HTTP]
+
+documentation:
+  - title: Overview
+    content: |
+      Internal mesh API. Encapsulates the aggregation rule: call the three
+      System APIs in parallel (Scatter-Gather), apply fallback rules, then
+      return one unified payload. Also publishes a lightweight event to Kafka
+      asynchronously after aggregation.
+
+types:
+
+  CitizenId:
+    type: string
+    pattern: "^RN-[0-9]{5}$"
+
+  Identity:
+    type: object
+    properties:
+      citizenId: CitizenId
+      firstName: string
+      lastName: string
+      dateOfBirth: date-only
+      address:
+        type: object
+        properties:
+          street: string
+          city: string
+          postcode: string
+      identityVerified: boolean
+      riskBand: string
+      status:
+        type: string
+        enum: [AVAILABLE, UNAVAILABLE]
+
+  Case:
+    type: object
+    properties:
+      caseId: string
+      type: string
+      status: string
+      openedDate: date-only
+      officer: string | nil
+
+  License:
+    type: object
+    properties:
+      licenseId: string
+      type: string
+      status: string
+      expiryDate: date-only
+
+  Aggregate:
+    type: object
+    properties:
+      citizenId: CitizenId
+      identity: Identity
+      cases: Case[]
+      licenses: License[]
+      asOf: datetime
+
+/citizens:
+  /{citizenId}:
+    uriParameters:
+      citizenId: CitizenId
+    /aggregate:
+      get:
+        description: |
+          Aggregate identity + cases + licenses for one citizen.
+          On single-downstream failure, return fallback and HTTP 200.
+          On two-or-more downstream failures, return 503.
+        responses:
+          200:
+            body:
+              application/json:
+                type: Aggregate
+                example:
+                  citizenId: RN-12345
+                  identity:
+                    citizenId: RN-12345
+                    firstName: Jinyu
+                    lastName: Liang
+                    dateOfBirth: "1983-05-12"
+                    address:
+                      street: "330 Cashel Street"
+                      city: Christchurch
+                      postcode: "8011"
+                    identityVerified: true
+                    riskBand: LOW
+                    status: AVAILABLE
+                  cases:
+                    - caseId: CASE-2026-001
+                      type: BENEFIT
+                      status: IN_PROGRESS
+                      openedDate: "2026-09-15"
+                      officer: "J. Smith"
+                  licenses:
+                    - licenseId: LIC-44556
+                      type: DRIVING
+                      status: ACTIVE
+                      expiryDate: "2027-03-01"
+                  asOf: "2026-10-22T12:00:00Z"
+          503:
+            body:
+              application/json:
+                example:
+                  error: "downstream_degraded"
+                  detail: "2+ downstream systems unavailable"

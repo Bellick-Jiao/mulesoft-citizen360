@@ -1,0 +1,52 @@
+#%RAML 1.0
+title: DIA RealMe Identity API (external, as published by DIA)
+version: v1
+baseUri: https://realme.govt.nz/api
+mediaType: application/json
+protocols: [HTTPS]
+
+securitySchemes:
+  oauth2:
+    type: OAuth 2.0
+    describedBy:
+      headers:
+        Authorization: { required: true }
+
+securedBy: [oauth2]
+
+types:
+  CitizenId:
+    type: string
+    pattern: "^RN-[0-9]{5}$"
+  Address:
+    type: object
+    properties:
+      street: string
+      city: string
+      postcode: string
+  IdentityRecord:
+    type: object
+    properties:
+      citizenId: CitizenId
+      firstName: string
+      lastName: string
+      dateOfBirth: date-only
+      address: Address
+      identityVerified: boolean
+      riskBand: string
+
+/realme/v1/citizens:
+  /{citizenId}:
+    uriParameters:
+      citizenId: CitizenId
+    get:
+      description: Read one citizen identity record from RealMe.
+      responses:
+        200:
+          body:
+            application/json:
+              type: IdentityRecord
+        404:
+          body:
+            application/json:
+              example: { "error": "not_found" }

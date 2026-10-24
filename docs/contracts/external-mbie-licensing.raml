@@ -1,0 +1,43 @@
+#%RAML 1.0
+title: MBIE Licensing API (external, as published by MBIE)
+version: v1
+baseUri: https://api.licensing.govt.nz/api
+mediaType: application/json
+protocols: [HTTPS]
+
+securitySchemes:
+  oauth2:
+    type: OAuth 2.0
+    describedBy:
+      headers:
+        Authorization: { required: true }
+
+securedBy: [oauth2]
+
+types:
+  License:
+    type: object
+    properties:
+      licenseId: string
+      citizenId: string
+      type: string
+      status: string
+      expiryDate: date-only
+
+/licenses/v1:
+  /licenses:
+    get:
+      description: List licenses held by a citizen.
+      queryParameters:
+        citizenId: { type: string, required: true }
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                licenses:
+                  - licenseId: LIC-44556
+                    citizenId: RN-12345
+                    type: DRIVING
+                    status: ACTIVE
+                    expiryDate: "2027-03-01"

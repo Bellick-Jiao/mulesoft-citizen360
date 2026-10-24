@@ -1,0 +1,42 @@
+# CloudHub 2.0 / Runtime Fabric deployment descriptor (importable into Anypoint Runtime Manager)
+apiVersion: mule.solace.io/v1alpha1
+kind: MuleApplication
+metadata:
+  name: customer-360-api
+  labels:
+    poc: customer360
+    layer: experience
+spec:
+  replicaCount: 1
+  vCores: 0.1
+  muleArtifact:
+    artifactId: customer-360-api
+    groupId: dev.jinyu.customer360
+    version: 1.0.0-SNAPSHOT
+  env:
+    - name: env
+      value: prod
+    - name: anypoint.platform.client_id
+      valueFrom:
+        secretKeyRef:
+          name: customer360-secrets
+          key: client-id
+    - name: anypoint.platform.client_secret
+      valueFrom:
+        secretKeyRef:
+          name: customer360-secrets
+          key: client-secret
+    - name: kafka.brokers
+      value: "kafka.customer360.svc:9092"
+    - name: crm.base.uri
+      value: "https://system-crm-api.prod.svc"
+    - name: order.base.uri
+      value: "https://system-order-api.prod.svc"
+  runtimeFabric:
+    internal:
+      http:
+        port: 8081
+  autoscaling:
+    min: 1
+    max: 2
+    targetCPU: 70

@@ -1,0 +1,71 @@
+#%RAML 1.0
+---
+title: System Identity API
+version: v1
+baseUri: http://localhost:8082/system
+mediaType: application/json
+
+documentation:
+  - title: Overview
+    content: |
+      System API wrapping DIA RealMe. Translates internal citizen IDs to
+      RealMe calls, handles OAuth2 token acquisition from DIA, and maps
+      RealMe response shape to the internal Identity model.
+
+types:
+
+  CitizenId:
+    type: string
+    pattern: "^RN-[0-9]{5}$"
+
+  Identity:
+    type: object
+    properties:
+      citizenId: CitizenId
+      firstName: string
+      lastName: string
+      dateOfBirth: date-only
+      address:
+        type: object
+        properties:
+          street: string
+          city: string
+          postcode: string
+      identityVerified: boolean
+      riskBand: string
+
+/identity:
+  /citizens:
+    /{citizenId}:
+      uriParameters:
+        citizenId: CitizenId
+      get:
+        description: Read one citizen identity record from RealMe.
+        responses:
+          200:
+            body:
+              application/json:
+                type: Identity
+                example:
+                  citizenId: RN-12345
+                  firstName: Jinyu
+                  lastName: Liang
+                  dateOfBirth: "1983-05-12"
+                  address:
+                    street: "330 Cashel Street"
+                    city: Christchurch
+                    postcode: "8011"
+                  identityVerified: true
+                  riskBand: LOW
+          404:
+            body:
+              application/json:
+                example:
+                  error: "not_found"
+                  citizenId: RN-99999
+          502:
+            body:
+              application/json:
+                example:
+                  error: "upstream_error"
+                  detail: "RealMe returned 500"

@@ -1,0 +1,54 @@
+#%RAML 1.0
+---
+title: System Case API
+version: v1
+baseUri: http://localhost:8083/system
+mediaType: application/json
+
+documentation:
+  - title: Overview
+    content: |
+      System API wrapping MCS's internal legacy Case Management system
+      (Spring Boot mock in POC). Exposes cases by citizen. The
+      `lastModifiedDate` field is for batch incremental sync and is not
+      stripped here — the Process API decides whether to expose it.
+
+types:
+
+  Case:
+    type: object
+    properties:
+      caseId: string
+      citizenId: string
+      type: string
+      status: string
+      openedDate: date-only
+      officer: string | nil
+      lastModifiedDate: datetime
+
+  CaseList:
+    type: object
+    properties:
+      cases: Case[]
+
+/cases:
+  get:
+    description: List all cases for a citizen.
+    queryParameters:
+      citizenId:
+        type: string
+        required: true
+    responses:
+      200:
+        body:
+          application/json:
+            type: CaseList
+            example:
+              cases:
+                - caseId: CASE-2026-001
+                  citizenId: RN-12345
+                  type: BENEFIT
+                  status: IN_PROGRESS
+                  openedDate: "2026-09-15"
+                  officer: "J. Smith"
+                  lastModifiedDate: "2026-10-20T08:30:00Z"

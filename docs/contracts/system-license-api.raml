@@ -1,0 +1,53 @@
+#%RAML 1.0
+---
+title: System License API
+version: v1
+baseUri: http://localhost:8085/system
+mediaType: application/json
+
+documentation:
+  - title: Overview
+    content: |
+      System API wrapping MBIE Licensing. Handles cross-agency OAuth2
+      and maps MBIE's license shape to the internal License model.
+
+types:
+
+  License:
+    type: object
+    properties:
+      licenseId: string
+      citizenId: string
+      type: string
+      status: string
+      expiryDate: date-only
+
+  LicenseList:
+    type: object
+    properties:
+      licenses: License[]
+
+/licenses:
+  get:
+    description: List licenses held by a citizen.
+    queryParameters:
+      citizenId:
+        type: string
+        required: true
+    responses:
+      200:
+        body:
+          application/json:
+            type: LicenseList
+            example:
+              licenses:
+                - licenseId: LIC-44556
+                  citizenId: RN-12345
+                  type: DRIVING
+                  status: ACTIVE
+                  expiryDate: "2027-03-01"
+                - licenseId: LIC-44599
+                  citizenId: RN-12345
+                  type: ALCOHOL
+                  status: EXPIRED
+                  expiryDate: "2025-12-15"
