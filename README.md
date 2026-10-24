@@ -1,158 +1,216 @@
 # Citizen360 — API-Led Mule 4 Integration
 
-A reference Mule 4 project that integrates three independent government systems
-(identity, case management, licensing) into a unified citizen 360 view using the
-**API-led connectivity** architecture pattern.
+An end-to-end MuleSoft integration project built to demonstrate the **full delivery
+lifecycle** of a real enterprise API programme — from contract-first API design on
+Anypoint Platform, through API-led development in Anypoint Studio, to event-driven
+streaming and automated testing.
 
-## Architecture
+**The business scenario:** a fictional government agency (Ministry of Citizen Services)
+holds citizen data in three disconnected, independently owned systems — a central
+identity service (RealMe), a legacy case-management platform, and a cross-agency
+licensing API. Service-centre staff have to log into all three and stitch the data
+together by hand. This project builds a single, governed citizen 360-view API on top
+of them, plus a near-real-time event stream.
 
-```
-Staff Portal / Mobile App
-        │
-        ▼
-┌─────────────────────────────────┐
-│  Experience Layer               │
-│  citizen-360-api (port 8081)     │
-│  OAuth2, audit, thin facade    │
-└──────────────┬──────────────────┘
-               │
-        ┌──────▼──────┐
-        │ Process Layer
-        │ citizen-360-process-api (port 8084)
-        │ Scatter-Gather + DataWeave aggregation
-        │ On Error Continue fallback
-        │ Async Kafka event publish
-        └──┬───────┬───────┬────────┘
-           ▼       ▼       ▼
-┌──────────┐ ┌──────────┐ ┌──────────┐
-│ System    │ │ System    │ │ System    │
-│ Identity  │ │ Case      │ │ License   │
-│ API 8082  │ │ API 8083  │ │ API 8085  │
-└────┬──────┘ └────┬─────┘ └────┬─────┘
-     ▼             ▼             ▼
-┌──────────┐ ┌──────────┐ ┌──────────┐
-│ DIA      │ │ Legacy   │ │ MBIE     │
-│ RealMe   │ │ Case Mgmt│ │ Licensing│
-│ mock 9082│ │ mock 9083│ │ mock 9085│
-└──────────┘ └──────────┘ └──────────┘
+---
 
-Kafka (citizen.events topic, port 9092)
-Kafka UI: http://localhost:8090
-```
+## What this project demonstrates
 
-## Ports
+Rather than a single "hello world" flow, this is a complete, realistic MuleSoft
+solution covering the skills an integration team owns across the entire engagement:
 
-| Service | Port | Description |
+| Phase | Capability shown | Where |
 |---|---|---|
-| citizen-360-api (Experience) | 8081 | Public-facing facade |
-| system-identity-api (System) | 8082 | Wraps DIA RealMe |
-| system-case-api (System) | 8083 | Wraps legacy Case Mgmt |
-| citizen-360-process-api (Process) | 8084 | Aggregation + orchestration |
-| system-license-api (System) | 8085 | Wraps MBIE Licensing |
-| external-dia-realme (mock) | 9082 | Spring Boot DIA stub |
-| external-case-mgmt (mock) | 9083 | Spring Boot case system stub |
-| external-mbie-licensing (mock) | 9085 | Spring Boot licensing stub |
-| Kafka broker | 9092 | KRaft mode |
-| Kafka UI | 8090 | http://localhost:8090 |
+| **1. Discovery & architecture** | Requirements, as-is/to-be analysis, API-led target architecture | [`docs/`](docs/) |
+| **2. Contract-first design** | RAML 1.0 specs, reusable types, examples, error model | [`docs/contracts/`](docs/contracts/) |
+| **3. System layer** | Wrapping legacy/SaaS backends into reusable governed APIs | `mule-apps/system-*` |
+| **4. Process layer** | Orchestration, parallel aggregation, transformation, graceful degradation | `mule-apps/citizen-360-process-api-impl` |
+| **5. Experience layer** | Channel-specific facade and API policy enforcement | `mule-apps/citizen-360-api-impl` |
+| **6. Event-driven** | Async Kafka publishing, keyed partitioning, event schema | `infra/` |
+| **7. Testing** | MUnit with mocked dependencies and assertions | `src/test/munit/` |
+| **8. CI/CD & deployment** | GitHub Actions pipeline, CloudHub 2.0 descriptor | [`.github/`](.github), [`infra/cloudhub.yaml`](infra/cloudhub.yaml) |
 
-## Prerequisites
+---
 
-- Anypoint Studio 7.x with Mule 4.4+ runtime
-- Docker Desktop (for Kafka + Kafka UI)
-- Java 17 (for Spring Boot mocks)
-- A Java IDE (IntelliJ IDEA recommended) for running the Spring Boot mocks
+## Target architecture
 
-## Quick Start
+```
+                         Service centre / citizen portal
+                                   │  HTTPS + OAuth2
+                                   ▼
+        ┌──────────────────────────────────────────────┐
+        │  EXPERIENCE API                               │
+        │  citizen-360-api (8081)                        │
+        │  Thin channel facade · audit · API policies   │
+        └───────────────────────┬──────────────────────┘
+                                 │
+                                 ▼
+        ┌──────────────────────────────────────────────┐
+        │  PROCESS API                                  │
+        │  citizen-360-process-api (8084)               │
+        │  Scatter-Gather (3 parallel routes)           │
+        │  DataWeave aggregation                        │
+        │  On Error Continue fallback                   │
+        │  Async event publish                          │
+        └───────┬───────────────┬───────────────┬──────┘
+                ▼               ▼               ▼
+        ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+        │ SYSTEM API   │ │ SYSTEM API   │ │ SYSTEM API   │
+        │ identity 8082│ │ case     8083│ │ license  8085│
+        └──────┬───────┘ └──────┬───────┘ └──────┬───────┘
+               ▼                ▼                ▼
+        ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+        │ DIA RealMe   │ │ Legacy Case  │ │ MBIE         │
+        │ (SaaS mock)  │ │ Mgmt (mock)  │ │ Licensing    │
+        └──────────────┘ └──────────────┘ └──────────────┘
+                 9082            9083             9085
 
-### 1. Start Kafka
-
-```powershell
-cd D:\workspace\doubao\mulesoft-poc
-docker compose -f infra/docker-compose.yml up -d
+         Process API ──async──► Kafka topic: citizen.events
+                                     └─► BI / audit / notifications
 ```
 
-Verify Kafka UI is running: http://localhost:8090
+---
 
-### 2. Start Spring Boot mock services
+## Technology stack and what each piece does
 
-Run these three apps from IntelliJ IDEA (one per run configuration):
+### MuleSoft / Anypoint Platform
+- **Mule Runtime 4.4, Anypoint Studio 7** — five deployable applications built visually and in XML.
+- **APIkit** — generates REST flows and routers directly from the RAML contract, so implementation always conforms to the published spec.
+- **DataWeave 2.0** — all message mapping, field shaping, and multi-source aggregation.
+- **RAML 1.0 & Design Center** — contract-first design, reusable types/examples, and documentation before code.
+- **HTTP Connector** — reusable request configurations with connection pooling and timeouts.
+- **Scatter-Gather** — fans out to the three system APIs **in parallel**, so latency is the slowest call, not the sum.
+- **Error Handler / On Error Continue** — per-route graceful degradation: one downstream failing returns fallback data with HTTP 200 instead of collapsing the whole request.
+- **Async scope** — publishes a Kafka event without blocking the response to the caller.
+- **MUnit / MUnit Tools** — unit tests that mock outbound HTTP calls and assert the aggregated result.
+- **CloudHub 2.0** — deployment descriptor included for managed runtime deployment.
 
-| Service | Directory | Port |
-|---|---|---|
-| external-dia-realme | `external-services/external-dia-realme` | 9082 |
-| external-case-mgmt | `external-services/external-case-mgmt` | 9083 |
-| external-mbie-licensing | `external-services/external-mbie-licensing` | 9085 |
+### Event-driven
+- **Apache Kafka (KRaft mode)** — ZooKeeper-less broker, topic `citizen.events`, keyed by `citizen-{citizenId}` so one citizen's events stay ordered on one partition.
+- **Kafka UI** — browser-based inspection of topics and messages.
+- **Event schema** — JSON payload (`eventType`, `citizenId`, `timestamp`, `correlationId`, `source`).
 
-### 3. Start Mule applications
+### Supporting services & tooling
+- **Spring Boot 3 / Java 17** — three independent mock backends that stand in for the real SaaS/legacy systems, so the Mule network is fully runnable and testable offline.
+- **Docker Compose** — one command brings up Kafka + Kafka UI.
+- **GitHub Actions** — CI pipeline for the Mule projects.
+- **draw.io** — system-boundary and business-process diagrams.
 
-Import the five projects from `mule-apps/` into Anypoint Studio
-(File → Import → Anypoint Studio project from File System) and run in order:
+---
 
-1. system-identity-api-impl (8082)
-2. system-case-api-impl (8083)
-3. system-license-api-impl (8085)
-4. citizen-360-process-api-impl (8084)
-5. citizen-360-api-impl (8081)
+## The delivery lifecycle, step by step
 
-### 4. Test the API
+### 1. Contract-first API design
+Designed every API in **RAML 1.0 before writing code** — defining endpoints, data types,
+examples, and the RFC 7807 `application/problem+json` error model. The contract is the
+single source of truth that APIkit uses to scaffold flows, and that consumers (front-end
+teams, partners) can build against in parallel.
 
-```bash
-# Direct Process API call
-curl http://localhost:8084/api/citizens/RN-12345/aggregate
+- [Experience API](docs/contracts/citizen-360-api.raml) — `GET /citizens/{id}/360`
+- [Process API](docs/contracts/citizen-360-process-api.raml) — aggregation endpoint
+- [System: Identity](docs/contracts/system-identity-api.raml) · [Case](docs/contracts/system-case-api.raml) · [License](docs/contracts/system-license-api.raml)
+- External reference specs for [DIA RealMe](docs/contracts/external-dia-realme.raml) and [MBIE Licensing](docs/contracts/external-mbie-licensing.raml)
 
-# Through Experience API
-curl http://localhost:8081/api/citizens/RN-12345/360
+### 2. System layer — "one system, one API"
+Each backend is wrapped in a dedicated System API that hides its native protocol,
+idiosyncrasies, and versioning. These APIs are reusable across any future channel.
+
+### 3. Process layer — orchestration and aggregation
+The Process API fans out in parallel, normalises the three different responses, and
+aggregates them into a single citizen view. Key DataWeave aggregation:
+
+```dataweave
+%dw 2.0
+output application/json
+---
+{
+  citizenId: vars.citizenId,
+  identity:  payload[0].payload,
+  cases:     payload[1].payload.cases default [],
+  licenses:  payload[2].payload.licenses default [],
+  asOf:      now()
+}
 ```
 
-### 5. Check Kafka events
+### 4. Resilience — graceful degradation
+Each Scatter-Gather route is wrapped in an **Error Handler with On Error Continue**. If,
+for example, identity is unavailable, the API still returns cases and licences with a
+fallback `{ "status": "UNAVAILABLE" }` marker and HTTP 200 — a partial view is more
+useful than a failed call.
 
-Open http://localhost:8090 → Topics → citizen.events → Messages
-You should see a `CitizenViewed` event published asynchronously.
+### 5. Event-driven streaming
+After the synchronous response is assembled, an **Async** scope emits a
+`CitizenViewed` event to Kafka (non-blocking). The `correlationId` is carried into the
+event for end-to-end audit tracing.
 
-## Test Data
+### 6. Automated testing with MUnit
+MUnit tests set up the inbound event (`uriParams.citizenId`), **mock every outbound HTTP
+request** so the suite runs without live backends, and assert the aggregated output.
+This proves the orchestration is correct in isolation and can run in CI headless.
 
-| RN Number | Name | City | Risk | Cases | Licenses |
-|---|---|---|---|---|---|
-| RN-12345 | Jinyu Liang | Christchurch | LOW | 2 | 2 |
-| RN-22222 | Maria Garcia | Wellington | MEDIUM | 1 | 1 |
-| RN-33333 | Hiro Tanaka | Auckland | HIGH | 0 | 0 |
+### 7. CI/CD and deployment
+A GitHub Actions pipeline builds the Mule projects, and a CloudHub 2.0 descriptor
+describes the managed deployment — closing the loop from commit to runtime.
 
-## Key Patterns Demonstrated
+---
 
-- **API-led connectivity**: Experience / Process / System layers
-- **Scatter-Gather**: parallel fan-out to three System APIs
-- **DataWeave 2.0**: response aggregation and transformation
-- **On Error Continue**: per-route fallback when a downstream system is unavailable
-- **Async scope**: non-blocking Kafka event publishing
-- **MUnit**: unit testing with mocked HTTP dependencies
-- **RAML 1.0**: API contract-first design
-- **Kafka KRaft**: event streaming without ZooKeeper
+## Integration patterns & skills matrix
 
-## Project Structure
+| Skill | How it's applied here |
+|---|---|
+| API-led connectivity | Three clearly separated tiers — System, Process, Experience |
+| Contract-first design | RAML 1.0 specs authored before implementation |
+| Parallel orchestration | Scatter-Gather across three dependencies |
+| Data transformation | DataWeave 2.0 aggregation, defaulting, field shaping |
+| Error handling | On Error Continue with per-route fallback |
+| Async messaging | Non-blocking Kafka publish with partition keys |
+| API resilience | Connection configs, timeouts, partial-failure semantics |
+| Unit testing | MUnit mocking HTTP dependencies + assertions |
+| Backend mocking | Spring Boot 3 stand-ins for SaaS/legacy systems |
+| Containerisation | Docker Compose for Kafka + UI |
+| CI/CD | GitHub Actions + CloudHub 2.0 descriptor |
+| Architecture & docs | As-is/to-be analysis, boundary diagrams (draw.io) |
+
+---
+
+## Repository layout
 
 ```
 mulesoft-citizen360/
-├── mule-apps/                       # Mule 4 applications
-│   ├── citizen-360-api-impl/        # Experience layer (port 8081)
-│   ├── citizen-360-process-api-impl/ # Process layer (port 8084)
-│   ├── system-identity-api-impl/    # System: RealMe (port 8082)
-│   ├── system-case-api-impl/        # System: Cases (port 8083)
-│   └── system-license-api-impl/     # System: Licensing (port 8085)
-├── external-services/               # Spring Boot mock backends
-│   ├── external-dia-realme/         # DIA mock (port 9082)
-│   ├── external-case-mgmt/          # Case Mgmt mock (port 9083)
-│   └── external-mbie-licensing/     # MBIE mock (port 9085)
-├── docs/
+├── mule-apps/                          # Mule 4 applications
+│   ├── citizen-360-api-impl/           # Experience layer
+│   ├── citizen-360-process-api-impl/   # Process layer + MUnit suite
+│   ├── system-identity-api-impl/       # System: identity
+│   ├── system-case-api-impl/           # System: cases
+│   └── system-license-api-impl/        # System: licences
+├── external-services/                  # Spring Boot mock backends
+│   ├── external-dia-realme/
+│   ├── external-case-mgmt/
+│   └── external-mbie-licensing/
+├── docs/                               # Delivery documentation
 │   ├── 01-requirements.md
 │   ├── 02-as-is.md
 │   ├── 03-to-be.md
 │   ├── 04-api-contracts.md
 │   ├── business-process.drawio
-│   └── contracts/                   # RAML 1.0 API definitions
+│   └── contracts/                      # RAML 1.0 specs
 ├── infra/
-│   ├── docker-compose.yml           # Kafka KRaft + Kafka UI
-│   └── cloudhub.yaml                # CloudHub 2.0 deployment descriptor
-├── .github/workflows/
-│   └── mule-pipeline.yml            # GitHub Actions CI
-└── pom.xml                          # Parent Maven POM
+│   ├── docker-compose.yml              # Kafka + Kafka UI
+│   └── cloudhub.yaml                   # CloudHub 2.0 deployment
+├── .github/workflows/mule-pipeline.yml # CI
+└── pom.xml                             # Parent Maven POM
 ```
+
+---
+
+## Running locally (optional)
+
+The project is fully runnable. Full step-by-step setup is in the docs; the short version:
+
+1. `docker compose -f infra/docker-compose.yml up -d` — Kafka + UI (Kafka UI on `http://localhost:8090`)
+2. Run the three Spring Boot mocks from `external-services/` (ports 9082/9083/9085)
+3. Import the five `mule-apps/*` projects into Anypoint Studio and run them
+4. `GET http://localhost:8081/api/citizens/RN-12345/360` returns the aggregated view;
+   a `CitizenViewed` event appears in Kafka
+
+Sample citizens: `RN-12345` (verified / LOW risk), `RN-22222` (MEDIUM), `RN-33333` (HIGH, no cases or licences).
