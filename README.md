@@ -104,6 +104,11 @@ output application/json
 }
 ```
 
+The end-to-end call path, including the parallel fan-out, aggregation, async Kafka emit,
+and response, is shown below.
+
+![Request flow sequence](docs/request-flow.png)
+
 ### 4. Resilience — graceful degradation
 Each Scatter-Gather route is wrapped in an **Error Handler with On Error Continue**. If,
 for example, identity is unavailable, the API still returns cases and licences with a
@@ -120,9 +125,13 @@ MUnit tests set up the inbound event (`uriParams.citizenId`), **mock every outbo
 request** so the suite runs without live backends, and assert the aggregated output.
 This proves the orchestration is correct in isolation and can run in CI headless.
 
+![MUnit test flow](docs/munit-testing.png)
+
 ### 7. CI/CD and deployment
 A GitHub Actions pipeline builds the Mule projects, and a CloudHub 2.0 descriptor
 describes the managed deployment — closing the loop from commit to runtime.
+
+![CI/CD pipeline](docs/cicd-pipeline.png)
 
 ---
 
@@ -164,7 +173,10 @@ mulesoft-citizen360/
 │   ├── 02-as-is.md
 │   ├── 03-to-be.md
 │   ├── 04-api-contracts.md
-│   ├── business-process.drawio
+│   ├── target-architecture.drawio      # Target architecture (+ .png/.svg)
+│   ├── request-flow.drawio             # Request sequence (+ .png)
+│   ├── munit-testing.drawio            # Test flow (+ .png)
+│   ├── cicd-pipeline.drawio            # CI/CD pipeline (+ .png)
 │   └── contracts/                      # RAML 1.0 specs
 ├── infra/
 │   ├── docker-compose.yml              # Kafka + Kafka UI

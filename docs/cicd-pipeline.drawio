@@ -1,0 +1,63 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="cicd" name="CI/CD Pipeline">
+    <mxGraphModel dx="1500" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="560" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title" value="CI/CD pipeline — commit to CloudHub 2.0" style="text;html=1;fontSize=19;fontStyle=1;align=center;fontColor=#1a2a3a;" vertex="1" parent="1">
+          <mxGeometry x="350" y="18" width="800" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="subtitle" value="GitHub Actions builds and tests the Mule projects; a green build produces the deployable artifact for the managed runtime" style="text;html=1;fontSize=12;fontStyle=2;align=center;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="250" y="52" width="1000" height="22" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="b1" value="git push&#xa;to main&#xa;&#xa;Mule sources +&#xa;MUnit suites" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#34495e;strokeColor=#2c3e50;fontColor=#ffffff;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="50" y="130" width="200" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="b2" value="GitHub Actions&#xa;&#xa;.github/workflows&#xa;/mule-pipeline.yml&#xa;checkout + JDK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2088ff;strokeColor=#0b5cad;fontColor=#ffffff;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="290" y="130" width="200" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="b3" value="Maven build&#xa;&#xa;compile each&#xa;Mule app&#xa;(parent POM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a75bb;strokeColor=#0d4d8c;fontColor=#ffffff;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="530" y="130" width="200" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="b4" value="MUnit tests&#xa;&#xa;headless run&#xa;mock all HTTP&#xa;dependencies" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#27ae60;strokeColor=#1e8449;fontColor=#ffffff;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="770" y="130" width="200" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="b5" value="Package&#xa;&#xa;deployable Mule&#xa;application&#xa;artifact" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e67e22;strokeColor=#a04000;fontColor=#ffffff;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="130" width="200" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="b6" value="CloudHub 2.0&#xa;&#xa;infra/cloudhub.yaml&#xa;managed runtime&#xa;deploy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#9b59b6;strokeColor=#6c3483;fontColor=#ffffff;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="130" width="200" height="140" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="a1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#333333;endArrow=block;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="b1" target="b2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="a2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#333333;endArrow=block;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="b2" target="b3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="a3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#333333;endArrow=block;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="b3" target="b4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="a4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#333333;endArrow=block;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="b4" target="b5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="a5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#333333;endArrow=block;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="b5" target="b6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="fail" value="On test failure: pipeline stops — no artifact, no deploy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8d7da;strokeColor=#c0392b;fontColor=#922b21;fontSize=11;fontStyle=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="770" y="320" width="360" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="aFail" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#c0392b;dashed=1;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="b4" target="fail">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="note" value="Local development mirrors this path: Studio build → MUnit → run on local runtime, with Docker Compose providing Kafka + Kafka UI." style="text;html=1;fontSize=11;fontStyle=2;align=center;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="250" y="400" width="1000" height="22" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
