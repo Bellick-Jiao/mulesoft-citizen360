@@ -34,40 +34,12 @@ solution covering the skills an integration team owns across the entire engageme
 
 ## Target architecture
 
-```
-                         Service centre / citizen portal
-                                   │  HTTPS + OAuth2
-                                   ▼
-        ┌──────────────────────────────────────────────┐
-        │  EXPERIENCE API                               │
-        │  citizen-360-api (8081)                        │
-        │  Thin channel facade · audit · API policies   │
-        └───────────────────────┬──────────────────────┘
-                                 │
-                                 ▼
-        ┌──────────────────────────────────────────────┐
-        │  PROCESS API                                  │
-        │  citizen-360-process-api (8084)               │
-        │  Scatter-Gather (3 parallel routes)           │
-        │  DataWeave aggregation                        │
-        │  On Error Continue fallback                   │
-        │  Async event publish                          │
-        └───────┬───────────────┬───────────────┬──────┘
-                ▼               ▼               ▼
-        ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-        │ SYSTEM API   │ │ SYSTEM API   │ │ SYSTEM API   │
-        │ identity 8082│ │ case     8083│ │ license  8085│
-        └──────┬───────┘ └──────┬───────┘ └──────┬───────┘
-               ▼                ▼                ▼
-        ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-        │ DIA RealMe   │ │ Legacy Case  │ │ MBIE         │
-        │ (SaaS mock)  │ │ Mgmt (mock)  │ │ Licensing    │
-        └──────────────┘ └──────────────┘ └──────────────┘
-                 9082            9083             9085
+![Citizen360 target architecture](docs/target-architecture.png)
 
-         Process API ──async──► Kafka topic: citizen.events
-                                     └─► BI / audit / notifications
-```
+*Editable source: [`docs/target-architecture.drawio`](docs/target-architecture.drawio) (diagrams.net).*
+
+The diagram shows the three API-led tiers, the external systems they wrap, the
+parallel fan-out in the Process layer, and the async event stream into Kafka.
 
 ---
 
