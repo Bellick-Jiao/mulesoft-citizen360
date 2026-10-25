@@ -1,47 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
 <mxfile host="app.diagrams.net" type="device">
   <diagram id="munit" name="MUnit Testing">
-    <mxGraphModel dx="1500" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="520" math="0" shadow="0">
+    <mxGraphModel dx="1500" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="1040" math="0" shadow="0">
       <root>
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
 
-        <mxCell id="title" value="MUnit test flow — citizen-360-process-api-test-suite.xml" style="text;html=1;fontSize=19;fontStyle=1;align=center;fontColor=#1a2a3a;" vertex="1" parent="1">
-          <mxGeometry x="350" y="18" width="800" height="30" as="geometry"/>
+        <mxCell id="title" value="MUnit test flow — citizen-360-process-api-test-suite.xml" style="text;html=1;fontSize=38;fontStyle=1;align=center;fontColor=#1a2a3a;" vertex="1" parent="1">
+          <mxGeometry x="350" y="36" width="800" height="60" as="geometry"/>
         </mxCell>
-        <mxCell id="subtitle" value="Behavior-driven test: every outbound HTTP dependency is mocked, so the suite runs without live backends (and can run headless in CI)" style="text;html=1;fontSize=12;fontStyle=2;align=center;fontColor=#555555;" vertex="1" parent="1">
-          <mxGeometry x="250" y="52" width="1000" height="22" as="geometry"/>
-        </mxCell>
-
-        <mxCell id="tag1" value="GIVEN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a75bb;strokeColor=#0d4d8c;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="70" y="110" width="240" height="26" as="geometry"/>
-        </mxCell>
-        <mxCell id="tag2" value="GIVEN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a75bb;strokeColor=#0d4d8c;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="360" y="110" width="240" height="26" as="geometry"/>
-        </mxCell>
-        <mxCell id="tag3" value="WHEN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e67e22;strokeColor=#a04000;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="650" y="110" width="240" height="26" as="geometry"/>
-        </mxCell>
-        <mxCell id="tag4" value="THEN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#9b59b6;strokeColor=#6c3483;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="940" y="110" width="240" height="26" as="geometry"/>
-        </mxCell>
-        <mxCell id="tag5" value="RESULT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#27ae60;strokeColor=#1e8449;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="1230" y="110" width="200" height="26" as="geometry"/>
+        <mxCell id="subtitle" value="Behavior-driven test: every outbound HTTP dependency is mocked, so the suite runs without live backends (and can run headless in CI)" style="text;html=1;fontSize=18;fontStyle=2;align=center;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="50" y="104" width="1400" height="44" as="geometry"/>
         </mxCell>
 
-        <mxCell id="b1" value="1 · Set Event&#xa;&#xa;Set inbound message:&#xa;attributes = { uriParams:&#xa;{ citizenId: &quot;RN-12345&quot; } }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf2fb;strokeColor=#1a75bb;fontSize=11;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;fontColor=#0d4d8c;" vertex="1" parent="1">
-          <mxGeometry x="55" y="150" width="270" height="150" as="geometry"/>
+        <mxCell id="tag1" value="GIVEN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a75bb;strokeColor=#0d4d8c;fontColor=#ffffff;fontSize=22;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="220" width="240" height="52" as="geometry"/>
         </mxCell>
-        <mxCell id="b2" value="2 · Mock When&#xa;&#xa;processor = http:request&#xa;then-return fixed JSON fixtures&#xa;(identity / cases / licenses)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf2fb;strokeColor=#1a75bb;fontSize=11;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;fontColor=#0d4d8c;" vertex="1" parent="1">
-          <mxGeometry x="345" y="150" width="270" height="150" as="geometry"/>
+        <mxCell id="tag2" value="GIVEN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a75bb;strokeColor=#0d4d8c;fontColor=#ffffff;fontSize=22;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="220" width="240" height="52" as="geometry"/>
         </mxCell>
-        <mxCell id="b3" value="3 · Run flow&#xa;&#xa;Execute the aggregate&#xa;Scatter-Gather flow&#xa;under test" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdebd8;strokeColor=#e67e22;fontSize=11;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;fontColor=#a04000;" vertex="1" parent="1">
-          <mxGeometry x="635" y="150" width="270" height="150" as="geometry"/>
+        <mxCell id="tag3" value="WHEN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e67e22;strokeColor=#a04000;fontColor=#ffffff;fontSize=22;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="650" y="220" width="240" height="52" as="geometry"/>
         </mxCell>
-        <mxCell id="b4" value="4 · Assert equals&#xa;&#xa;Actual:   #[payload.citizenId]&#xa;Expected: #&#x27;RN-12345&#x27;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede1f5;strokeColor=#9b59b6;fontSize=11;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;fontColor=#5b2c6f;" vertex="1" parent="1">
-          <mxGeometry x="925" y="150" width="270" height="150" as="geometry"/>
+        <mxCell id="tag4" value="THEN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#9b59b6;strokeColor=#6c3483;fontColor=#ffffff;fontSize=22;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="940" y="220" width="240" height="52" as="geometry"/>
         </mxCell>
-        <mxCell id="b5" value="5 · Test&#xa;&#xa;MUnit suite&#xa;PASSES" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#27ae60;fontColor=#1e8449;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
-          <mxGeometry x="1215" y="150" width="230" height="150" as="geometry"/>
+        <mxCell id="tag5" value="RESULT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#27ae60;strokeColor=#1e8449;fontColor=#ffffff;fontSize=22;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="220" width="200" height="52" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="b1" value="1 · Set Event&#10;&#10;Set inbound message:&#10;attributes = { uriParams:&#10;{ citizenId: &quot;RN-12345&quot; } }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf2fb;strokeColor=#1a75bb;fontSize=22;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;fontColor=#0d4d8c;" vertex="1" parent="1">
+          <mxGeometry x="55" y="300" width="270" height="300" as="geometry"/>
+        </mxCell>
+        <mxCell id="b2" value="2 · Mock When&#10;&#10;processor = http:request&#10;then-return fixed JSON fixtures&#10;(identity / cases / licenses)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf2fb;strokeColor=#1a75bb;fontSize=22;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;fontColor=#0d4d8c;" vertex="1" parent="1">
+          <mxGeometry x="345" y="300" width="270" height="300" as="geometry"/>
+        </mxCell>
+        <mxCell id="b3" value="3 · Run flow&#10;&#10;Execute the aggregate&#10;Scatter-Gather flow&#10;under test" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdebd8;strokeColor=#e67e22;fontSize=22;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;fontColor=#a04000;" vertex="1" parent="1">
+          <mxGeometry x="635" y="300" width="270" height="300" as="geometry"/>
+        </mxCell>
+        <mxCell id="b4" value="4 · Assert equals&#10;&#10;Actual:   #[payload.citizenId]&#10;Expected: #'RN-12345'" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede1f5;strokeColor=#9b59b6;fontSize=22;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;fontColor=#5b2c6f;" vertex="1" parent="1">
+          <mxGeometry x="925" y="300" width="270" height="300" as="geometry"/>
+        </mxCell>
+        <mxCell id="b5" value="5 · Test&#10;&#10;MUnit suite&#10;PASSES" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#27ae60;fontColor=#1e8449;fontSize=24;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1215" y="300" width="230" height="300" as="geometry"/>
         </mxCell>
 
         <mxCell id="a1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#333333;endArrow=block;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="b1" target="b2">
@@ -57,8 +58,8 @@
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
 
-        <mxCell id="note" value="Same pattern extends to asserting cases/licenses counts, aggregation shape, and fallback behavior when a mocked downstream returns an error." style="text;html=1;fontSize=11;fontStyle=2;align=center;fontColor=#555555;" vertex="1" parent="1">
-          <mxGeometry x="250" y="330" width="1000" height="22" as="geometry"/>
+        <mxCell id="note" value="Same pattern extends to asserting cases/licenses counts, aggregation shape, and fallback behavior when a mocked downstream returns an error." style="text;html=1;fontSize=18;fontStyle=2;align=center;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="50" y="660" width="1400" height="44" as="geometry"/>
         </mxCell>
       </root>
     </mxGraphModel>
